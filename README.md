@@ -35,6 +35,11 @@ Existen varias versiones de Java, cargaremos Java:
     ml Java/1.8
 
 
+Crearemos un ambiente python para instalar algunas dependencias necesarias para ejecutar GATK:
+
+Para esto descargaremos conda, iremos a Anaconda y descargaremos la version requerida para este GATK, que es python 3.6.2 descrita en el README.md de GATK.
+
+
 
 
 
