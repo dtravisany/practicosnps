@@ -1,4 +1,4 @@
-# Practico SNPs
+# Práctico SNPs
 
 Introducción
 
