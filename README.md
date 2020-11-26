@@ -75,6 +75,11 @@ Guardamos y ejecutamos nuestro job:
     sbatch install.sbatch
       
 y esperamos la instalación, luego de que se haya completado la instalación (aprox 10 min).
+
+Podemos monitorear el estado de nuestro job con el comando watch y squeue:
+
+    watch squeue
+
 Si lo ejecutó por defecto, su instalación debería quedar en el path: `/home/courses/student[07-10]/anaconda3`.
 
 Cuando la instalación se haya completado, inicializaremos conda para que considere 
@@ -94,10 +99,19 @@ Ahora deberiamos ver en nuestro prompt algo como esto:
 Ya tenemos nuestro python local corriendo y listo para instalarle paquetes.
 El primer caveat es que la versión requerida para este GATK, es python 3.6.2 descrita en el README.md de GATK.
 Por lo que vamos a generar un ambiente virtual de nuestro miniconda que contenga solo los requerimientos de GATK.
+Para nuestro beneficio estos requermientos vienen en un archivo de configuracion yaml.
+
+Nos vamos a:
+
+    cd GATK
+    cd gatk-4.1.9.0
+ y crearemos un ambiente GATK:
+ 
+    conda env create -f gatkcondaenv.yml
+
 De esta manera no interferimos con los paquetes ya instalados, para esto haremos un 
-      
-      conda create -n GATK python=3.6.2
-      
+Con esto hemos creado un nuevo ambiente python 3.6.2, puede revisar sus ambientes en `~/anaconda3/envs/` o con ```conda environments```.
+
 Para activar el ambiente ejecutaremos
 
       conda activate GATK
@@ -110,19 +124,110 @@ podemos ver que nuestro python ahora cambio de dirección de nuevo:
 
       which python
       
+ahora volvemos a la carpeta de GATK:
+
+    cd GATK
+
+## GATK Pipeline Magic
+
+### Basado en las recomendaciones de [Ricardo Palma](http://www.cmm.uchile.cl/?cmm_people=ricardo-palma)
 
 
-Con esto hemos creado un nuevo ambiente python 3.6.2, puede revisar sus ambientes en:
+### Paso 1.
 
-      cd ~/anaconda3/envs/
+Filtering with BBDUK “””AKA””” Magical Mathematics of Console Gymnastics
+https://jgi.doe.gov/data-and-tools/bbtools/bb-tools-user-guide/bbduk-guide/ 
+
+$ bbduk.sh -Xmx3g in=R1.fq in2=R2.fq ref=adaptor_file.fa mm=f rcomp=f
+out=clean_R1 out2=clean_R2 threads=20 minlen=read_min_len
+qtrim=lr trimq=20 ktrim=r k=21 mink=9 hdist=1 tpe tbo overwrite=true
+
+read_min_len: Minimal size of read length before trimming. (depends on sample 
+profiles)
+
+- Paso 2
+Mapping BWA
+http://bio-bwa.sourceforge.net/ 
+
+$ bwa index reference.fasta
+$ bwa mem -t 20 -o output.sam clean_R1.fq clean_R2.fq
+$ samtools view -bS output.sam > output.bam
+
+
+Paso 3
+MarkDuplicates and Sorting BAM
+https://gatk.broadinstitute.org/hc/en-us/articles/360037224932-MarkDuplicatesSpark
+
+$ gatk MarkDuplicatesSpark -I output.bam -O marked_duplicates_sorted.bam
+
+If can’t make MarkDuplicatesSpark work, use the old method:
+
+$ java -jar picard.jar MarkDuplicates I= output.bam 
+O=marked_duplicates.bam M=marked_dup_metrics.txt
+
+$ samtools sort -T temp_sorted.bam -o marked_duplicates_sorted.bam 
+marked_dup_metrics.txt
+
+
+
+Paso 4
+Haplotypecalller : Variant Calling Per-Sample
+https://gatk.broadinstitute.org/hc/en-us/articles/360042913231-HaplotypeCaller
+
+$ gatk –java-options “-Xmx12G” HaplotypeCaller -R reference.fasta 
+-I marked_duplicates_sorted.bam -O output.g.vcf.gz -ERC GVCF
+
+Paso 5 
+VariantRecalibrator, and ApplyVQSR
+
+-----“NOPE” skip to Paso 5 EASY
+
+
+
+
+Paso 5 EASY 
+“”””AKA”””” This is not my Tesis or anything so I don’t care that much about 
+these samples ….. or my lab is too  cheap and they are a bunch of wannabes 
+so they did the WES/WGS in assembly ChR37 instead of ChR38 so I’ll do the 
+easy way”
+https://gatk.broadinstitute.org/hc/en-us/articles/360035531112--How-to-Filter-variants
+-either-with-VQSR-or-by-hard-filtering 
+
+First, split the g_vcf. Files into SNPs and INDELs:
+
+$ gatk SelectVariants -V output.g.vcf.gz -select-type SNP -O only_snps.vcf.gz
+$ gatk SelectVariants -V output.g.vcf.gz -select-type INDEL -O only_indels.vcf.gz
+
+
+Now apply the “Hard-filtering” for Variants.
+
+
+Hard-Filtering for SNPs
+
+$ gatk VariantFiltration -V only_snps.vcf.gz -filter "QD < 2.0" --filter-name "QD2" -filter "QUAL < 30.0" --filter-name "QUAL30" -filter "SOR > 3.0" --filter-name "SOR3" -filter "FS > 60.0" --filter-name "FS60" -filter "MQ < 40.0" --filter-name "MQ40" -filter "MQRankSum < -12.5" --filter-name "MQRankSum-12.5" -filter "ReadPosRankSum < -8.0" --filter-name "ReadPosRankSum-8" -O snps_filtered.vcf.gz
+
+
+Hard-Filtering for INDELs
+
+$ gatk VariantFiltration V only_indels.vcf.gz -filter "QD < 2.0" --filter-name "QD2"    -filter "QUAL < 30.0" --filter-name "QUAL30" -filter "FS > 200.0" --filter-name "FS200" -filter "ReadPosRankSum < -20.0" --filter-name "ReadPosRankSum-20" -O indels_filtered.vcf.gz
+
+
+If a variant Pass all filters it will be tag as PASS in the “INFO” field 
+of the VCF, if not the name of the fault filter will be displayed.
+
+Last Step
+
+Extract all PASS sequences in the VCF file.
+
+
+## _Congrats, you skipped 6 months navigating GATK forums. Ricardo Palma_ 
+
+
+
       
 
 
 
-
-Para esto utilizaremos el paquete `virtualenv` que deberemos descargar mediante pip:
-
-      pip install virtualenv
 
 
 
