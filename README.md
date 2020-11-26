@@ -37,9 +37,50 @@ Existen varias versiones de Java, cargaremos Java:
 
 Crearemos un ambiente python para instalar algunas dependencias necesarias para ejecutar GATK:
 
-Para esto descargaremos conda, iremos a Anaconda y descargaremos la version requerida para este GATK, que es python 3.6.2 descrita en el README.md de GATK.
+      cd ..
+      mkdir python
+      cd python
 
 
+Para esto descargaremos miniconda, iremos a [conda](https://docs.conda.io/en/latest/miniconda.html) y descargaremos la última versión en este caso 3.8:
+
+      wget https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh
+
+
+
+Crearemos un job para instalar anaconda:
+
+      vim install.sbatch
+      
+ escribimos lo siguiente:
+ 
+      #!/bin/sh
+
+      #SBATCH --job-name=miniconda
+      #SBATCH --output=mini.out
+      #SBATCH --error=mini.err
+      #SBATCH --mail-user=user@mail.com
+      #SBATCH --nodes=1
+      #SBATCH --mail-type=ALL
+      sh Miniconda3-latest-Linux-x86_64.sh -b -p $HOME/anaconda3
+
+Guardamos y ejecutamos nuestro job:
+
+      sbatch install.sbatch
+      
+y esperamos la instalación.
+
+
+
+
+      
+Si lo ejecutó por defecto, su instalación debería quedar en el path: `/home/courses/student[07-10]/anaconda3`
+
+Sin embargo, la versión requerida para este GATK, es python 3.6.2 descrita en el README.md de GATK.
+Por lo que generaremos un ambiente especial para GATK.
+
+       
+      
 
 
 
