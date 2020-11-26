@@ -130,60 +130,53 @@ ahora volvemos a la carpeta de GATK:
 
 ## GATK Pipeline Magic
 
-### Basado en las recomendaciones de [Ricardo Palma](http://www.cmm.uchile.cl/?cmm_people=ricardo-palma)
+##### Basado en las recomendaciones de [Ricardo Palma](http://www.cmm.uchile.cl/?cmm_people=ricardo-palma)
 
 
-### Paso 1.
+### Paso 1. Filtrado:
 
-Filtering with BBDUK “””AKA””” Magical Mathematics of Console Gymnastics
-https://jgi.doe.gov/data-and-tools/bbtools/bb-tools-user-guide/bbduk-guide/ 
+Realizaremos el filtrado con [BBDUK](https://jgi.doe.gov/data-and-tools/bbtools/bb-tools-user-guide/bbduk-guide/) “””aka Magical Mathematics of Console Gymnastics ””” 
 
-$ bbduk.sh -Xmx3g in=R1.fq in2=R2.fq ref=adaptor_file.fa mm=f rcomp=f
-out=clean_R1 out2=clean_R2 threads=20 minlen=read_min_len
-qtrim=lr trimq=20 ktrim=r k=21 mink=9 hdist=1 tpe tbo overwrite=true
+    bbduk.sh -Xmx3g in=R1.fq in2=R2.fq ref=adaptor_file.fa mm=f \\
+    rcomp=f out=clean_R1 out2=clean_R2 threads=20 minlen=read_min_len \\
+    qtrim=lr trimq=20 ktrim=r k=21 mink=9 hdist=1 tpe tbo overwrite=true
+
+Parámetros:
 
 read_min_len: Minimal size of read length before trimming. (depends on sample 
 profiles)
 
-- Paso 2
-Mapping BWA
-http://bio-bwa.sourceforge.net/ 
+### Paso 2, Mapping [BWA](http://bio-bwa.sourceforge.net/)
 
-$ bwa index reference.fasta
-$ bwa mem -t 20 -o output.sam clean_R1.fq clean_R2.fq
-$ samtools view -bS output.sam > output.bam
+        bwa index reference.fasta
+        bwa mem -t 20 -o output.sam clean_R1.fq clean_R2.fq
+        samtools view -bS output.sam > output.bam
 
 
-Paso 3
+### Paso 3, [MarkDuplicates](https://gatk.broadinstitute.org/hc/en-us/articles/360037224932-MarkDuplicatesSpark)
+
 MarkDuplicates and Sorting BAM
-https://gatk.broadinstitute.org/hc/en-us/articles/360037224932-MarkDuplicatesSpark
 
-$ gatk MarkDuplicatesSpark -I output.bam -O marked_duplicates_sorted.bam
+    gatk MarkDuplicatesSpark -I output.bam -O marked_duplicates_sorted.bam
 
 If can’t make MarkDuplicatesSpark work, use the old method:
 
-$ java -jar picard.jar MarkDuplicates I= output.bam 
-O=marked_duplicates.bam M=marked_dup_metrics.txt
+    java -jar picard.jar MarkDuplicates I= output.bam O=marked_duplicates.bam M=marked_dup_metrics.txt
 
-$ samtools sort -T temp_sorted.bam -o marked_duplicates_sorted.bam 
-marked_dup_metrics.txt
+    samtools sort -T temp_sorted.bam -o marked_duplicates_sorted.bam marked_dup_metrics.txt
+
+### Paso 4 [Haplotypecalller](https://gatk.broadinstitute.org/hc/en-us/articles/360042913231-HaplotypeCaller): 
+
+Variant Calling Per-Sample
 
 
+    gatk –java-options “-Xmx12G” HaplotypeCaller -R reference.fasta -I marked_duplicates_sorted.bam -O output.g.vcf.gz -ERC GVCF
 
-Paso 4
-Haplotypecalller : Variant Calling Per-Sample
-https://gatk.broadinstitute.org/hc/en-us/articles/360042913231-HaplotypeCaller
+### Paso 5 
 
-$ gatk –java-options “-Xmx12G” HaplotypeCaller -R reference.fasta 
--I marked_duplicates_sorted.bam -O output.g.vcf.gz -ERC GVCF
-
-Paso 5 
 VariantRecalibrator, and ApplyVQSR
 
 -----“NOPE” skip to Paso 5 EASY
-
-
-
 
 Paso 5 EASY 
 “”””AKA”””” This is not my Tesis or anything so I don’t care that much about 
@@ -195,9 +188,8 @@ https://gatk.broadinstitute.org/hc/en-us/articles/360035531112--How-to-Filter-va
 
 First, split the g_vcf. Files into SNPs and INDELs:
 
-$ gatk SelectVariants -V output.g.vcf.gz -select-type SNP -O only_snps.vcf.gz
-$ gatk SelectVariants -V output.g.vcf.gz -select-type INDEL -O only_indels.vcf.gz
-
+    gatk SelectVariants -V output.g.vcf.gz -select-type SNP -O only_snps.vcf.gz
+    gatk SelectVariants -V output.g.vcf.gz -select-type INDEL -O only_indels.vcf.gz
 
 Now apply the “Hard-filtering” for Variants.
 
@@ -220,7 +212,7 @@ Last Step
 Extract all PASS sequences in the VCF file.
 
 
-## _Congrats, you skipped 6 months navigating GATK forums. Ricardo Palma_ 
+##### _Congrats, you skipped 6 months navigating GATK forums. Ricardo Palma_ 
 
 
 
