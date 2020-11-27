@@ -77,15 +77,15 @@ Crearemos un job para instalar anaconda:
       
  escribimos lo siguiente (deberá reemplazar su usuario y mail en el campo mail, para revisar que le llega la secuencia):
  ```bash
-    #!/bin/sh
+ #!/bin/sh
 
-    #SBATCH --job-name=miniconda
-    #SBATCH --output=mini.out
-    #SBATCH --error=mini.err
-    #SBATCH --mail-user=user@mail.com
-    #SBATCH --nodes=1
-    #SBATCH --mail-type=ALL
-    sh Miniconda3-latest-Linux-x86_64.sh -b -p $HOME/anaconda3
+ #SBATCH --job-name=miniconda
+ #SBATCH --output=mini.out
+ #SBATCH --error=mini.err
+ #SBATCH --mail-user=user@mail.com
+ #SBATCH --nodes=1
+ #SBATCH --mail-type=ALL
+ sh Miniconda3-latest-Linux-x86_64.sh -b -p $HOME/anaconda3
 ```
 
 Guardamos y ejecutamos nuestro job:
@@ -115,7 +115,7 @@ Ahora deberiamos ver en nuestro prompt algo como esto:
     (base)user@server:~$
       
 Ya tenemos nuestro python local corriendo y listo para instalarle paquetes.
-El primer caveat es que la versión requerida para este GATK, es python 3.6.2 descrita en el README.md de GATK.
+El primer caveat es que la versión requerida para este GATK, es python 3.6.2 descrita en el [README.md](https://github.com/broadinstitute/gatk) de GATK.
 Por lo que vamos a generar un ambiente virtual de nuestro miniconda que contenga solo los requerimientos de GATK.
 Para nuestro beneficio estos requermientos vienen en un archivo de configuracion yaml.
 
