@@ -1,11 +1,11 @@
 # Práctico SNPs
 
-#### Introducción
+## Introducción
 
 En el siguiente práctico ejecutaremos el pipeline de [GATK](https://gatk.broadinstitute.org/hc/en-us).
 Luego anotaremos las variantes y buscaremos el resultado en bases de datos internacionales.
 
-#### Objetivos
+## Objetivos
 
 1. Demostrar la capacidad de instalar un programa en HPC desde su carpeta local sin permiso de root.
 2. Poder ejecutar el pipeline y la generación de scripts `SBATCH` por si solos.
@@ -14,7 +14,7 @@ Luego anotaremos las variantes y buscaremos el resultado en bases de datos inter
 5. Anotar las variantes con [ANNOVAR](http://wannovar.wglab.org/) ([artículo](https://www.nature.com/articles/nprot.2015.105)).
 6. Interpretar los resultados.
 
-#### Fechas
+## Fechas
 
 1. La entrega será el 14 de diciembre del 2020 (no podemos pasarnos de esa fecha), sin embargo,
 2. Las cuentas estarán disponibles hasta el 16 de enero del 2021, por si les interesa utilizar el clúster.
@@ -204,9 +204,9 @@ Haremos un enlace simbólico a los reads:
     ln -s SRR062634_1.filt.fastq.gz R1.fq
     ln -s SRR062634_2.filt.fastq.gz R2.fq
 
-Descargaremos el archivo de adaptadores para [bbduk](https://github.com/BioInfoTools/BBMap/blob/master/resources/adapters.fa)
+Haremos un enlace simbólico al archivo de adaptadores para [bbduk](https://github.com/BioInfoTools/BBMap/blob/master/resources/adapters.fa)
 
-    wget https://raw.githubusercontent.com/BioInfoTools/BBMap/master/resources/adapters.fa
+    ln -s $HOME/bin/bbmap/resources/adapters.fa .
     
  Descargamos el genoma humano:
  
@@ -221,7 +221,7 @@ Descargaremos el archivo de adaptadores para [bbduk](https://github.com/BioInfoT
 ##### Basado en las recomendaciones de [Ricardo Palma](http://www.cmm.uchile.cl/?cmm_people=ricardo-palma)
 
 
-### Paso 1. Filtrado:
+#### Paso 1. Filtrado:
 
 Para cada comando o conjunto de comandos deberá realizar un script `SBATCH` para ejecutar sus tareas.
 Realizaré solo el primer script como instructivo:
@@ -266,14 +266,24 @@ bbduk.sh -Xmx3g in=R1.fq in2=R2.fq ref=adapters.fa mm=f rcomp=f out=clean_R1 out
 
 ```
 
-### Paso 2, Mapping [BWA](http://bio-bwa.sourceforge.net/)
+
+#### Paso 2, Mapping [BWA](http://bio-bwa.sourceforge.net/)
+
+Indexamos el genoma humano:
 
     bwa index reference.fna.gz
-    bwa mem -t 20 -o output.sam clean_R1.fq clean_R2.fq
+
+Mapeamos los reads al genoma (ATENTO CON LOS PARAMETROS DE SU JOB):
+
+    bwa mem -t 20 -o output.sam reference.fna.gz clean_R1 clean_R2
+
+Transformamos nuestro archivo sam a formato bam:
+
     samtools view -bS output.sam > output.bam
 
 
-### Paso 3, [MarkDuplicates](https://gatk.broadinstitute.org/hc/en-us/articles/360037224932-MarkDuplicatesSpark)
+
+#### Paso 3, [MarkDuplicates](https://gatk.broadinstitute.org/hc/en-us/articles/360037224932-MarkDuplicatesSpark)
 
 Marcamos los duplicados  y ordenamos el BAM
 
@@ -288,19 +298,19 @@ Si es que no llegara a funcionar podemos utilizar siempre el método antiguo
     samtools sort -T temp_sorted.bam -o marked_duplicates_sorted.bam marked_dup_metrics.txt
 
 
-### Paso 4 [Haplotypecalller](https://gatk.broadinstitute.org/hc/en-us/articles/360042913231-HaplotypeCaller): 
+#### Paso 4 [Haplotypecalller](https://gatk.broadinstitute.org/hc/en-us/articles/360042913231-HaplotypeCaller): 
 
 Variant Calling Per-Sample
 
 
     gatk –java-options “-Xmx12G” HaplotypeCaller -R reference.fasta -I marked_duplicates_sorted.bam -O output.g.vcf.gz -ERC GVCF
 
-### Paso 5 
+#### Paso 5 
 
 VariantRecalibrator, and [ApplyVQSR](https://gatk.broadinstitute.org/hc/en-us/articles/360035531112--How-to-Filter-variants)
 -either-with-VQSR-or-by-hard-filtering 
 
-#### First, split the g_vcf. Files into SNPs and INDELs:
+##### First, split the g_vcf. Files into SNPs and INDELs:
 
     gatk SelectVariants -V output.g.vcf.gz -select-type SNP -O only_snps.vcf.gz
     gatk SelectVariants -V output.g.vcf.gz -select-type INDEL -O only_indels.vcf.gz
@@ -308,7 +318,7 @@ VariantRecalibrator, and [ApplyVQSR](https://gatk.broadinstitute.org/hc/en-us/ar
 Now apply the “Hard-filtering” for Variants.
 
 
-##### Hard-Filtering for SNPs
+###### Hard-Filtering for SNPs
 
     gatk VariantFiltration -V only_snps.vcf.gz -filter "QD < 2.0" --filter-name "QD2" \\
     -filter "QUAL < 30.0" --filter-name "QUAL30" -filter "SOR > 3.0" --filter-name "SOR3" \\
@@ -317,7 +327,7 @@ Now apply the “Hard-filtering” for Variants.
     --filter-name "ReadPosRankSum-8" -O snps_filtered.vcf.gz
 
 
-##### Hard-Filtering for INDELs
+###### Hard-Filtering for INDELs
 
     gatk VariantFiltration V only_indels.vcf.gz -filter "QD < 2.0" --filter-name "QD2" \\
     -filter "QUAL < 30.0" --filter-name "QUAL30" -filter "FS > 200.0" --filter-name "FS200" \\
@@ -327,7 +337,7 @@ Now apply the “Hard-filtering” for Variants.
     If a variant Pass all filters it will be tag as PASS in the “INFO” field 
     of the VCF, if not the name of the fault filter will be displayed.
 
-### Last Step
+#### Last Step
 
 Extraer todas las variantes que pasaron el filtro `PASS` en GATK.
 
