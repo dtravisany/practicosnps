@@ -198,6 +198,28 @@ conda, porque sino sería muy compleja la instalación:
 
     conda install -c bioconda samtools
 
+Revisamos que funcione:
+
+	samtools
+
+ERROR:
+
+![SAMTOOLS ERROR](imgs/samtools_error.png)
+
+Podemos ver que nuestro entorno tiene un problema, si exploramos algunos foros para saber si es que alguien ya ha pasado por este problema, pasamos algunas horas leyendo y revisando los threads de respuesta en algunos foros
+como este de una [tool para Pacbio](https://github.com/PacificBiosciences/pbbioconda/issues/85), sin embargo, en [biostars](https://www.biostars.org/) un foro de bioinformática (muy bueno por cierto), hay una aproximación más confiable, podríamos probar esta solución:
+
+	conda install "samtools>=1.10"
+
+Podemos ver que este comando no soluciona el problema y es porque necesitamos ir a los repositorios de bioconda:
+
+	conda install -c bioconda "samtools>=1.10"
+
+Ahora probaremos samtools
+
+	samtools
+
+Perfecto,
 
 
 Ahora volvemos a nuestro `$HOME` y crearemos la carpeta `READS`:
