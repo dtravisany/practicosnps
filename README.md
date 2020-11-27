@@ -145,10 +145,52 @@ el prompt debería cambiar a:
 podemos ver que nuestro python ahora cambio de dirección de nuevo:
 
     which python
-      
-ahora volvemos a la carpeta de GATK:
+    
+Todavía nos queda instalar algunas herramientas bioinformáticas que utilizaremos en el práctico.
 
-    cd GATK
+    mkdir bin
+    cd bin
+
+Instalaremos [BBMap](https://jgi.doe.gov/data-and-tools/bbtools/bb-tools-user-guide/bbmap-guide/)
+
+    wget https://sourceforge.net/projects/bbmap/files/latest/download
+
+Podemos ver que al descargar nos quedará un archivo `download`.
+
+si ejecutamos un file:
+    
+    file download
+    
+veremos que es `download: gzip compressed data, was "BBMap_38.87.tar"`, es decir un archivo `.tar.gz`
+
+    tar xvfz download
+    rm download
+    cd bbmap
+
+revisaremos si funciona bbduk:
+    
+    ./bbduk.sh
+
+Ahora volvemos a nuestro `$HOME` y crearemos la carpeta `READS`:
+
+    cd
+    mkdir reads
+
+Dentro de la carpeta reads descargaremos los siguientes archivos del proyecto 1000 genomas:
+
+    wget ftp://ftp.1000genomes.ebi.ac.uk/vol1/ftp/phase3/data/HG00096/sequence_read/SRR062634_1.filt.fastq.gz
+    wget ftp://ftp.1000genomes.ebi.ac.uk/vol1/ftp/phase3/data/HG00096/sequence_read/SRR062634_2.filt.fastq.gz
+
+Luego extraeremos los reads:
+
+     gzip -d SRR062634_1.filt.fastq.gz
+     gzip -d SRR062634_2.filt.fastq.gz
+
+Haremos un enlace simbólico a los reads:
+
+    ln -s SRR062634_1.filt.fastq.gz R1.fq
+    ln -s SRR062634_2.filt.fastq.gz R2.fq
+
 
 ## GATK Pipeline Magic
 
@@ -158,7 +200,7 @@ ahora volvemos a la carpeta de GATK:
 ### Paso 1. Filtrado:
 
 Para cada comando o conjunto de comandos deberá realizar un script `SBATCH` para ejecutar sus tareas.
-
+Realizaré solo el primer script como instructivo:
 
 Realizaremos el filtrado con [BBDUK](https://jgi.doe.gov/data-and-tools/bbtools/bb-tools-user-guide/bbduk-guide/) “””aka Magical Mathematics of Console Gymnastics ””” 
 
@@ -170,6 +212,35 @@ Parámetros:
 
 read_min_len: Minimal size of read length before trimming. (depends on sample 
 profiles)
+
+Script `SBATCH`:
+
+Crearemos un archivo 
+    
+    vim runbb.sbatch
+
+y escribimos el siguiente contenido:
+
+```sh
+#!/bin/sh
+
+#SBATCH --job-name=bbduk ### ASIGNAMOS EL NOMBRE: bbduk
+#SBATCH --output=bbduk.out ### asignamos un archivo que nos guarde la salida o el STDOUT del programa
+#SBATCH --error=mini.err ### asignamos un archivo que nos guarde el error o el STDERR del programa
+#SBATCH --mail-user=user@mail.com ### asignamos un mail para que nos envié el status del job
+#SBATCH --nodes=1   ### forzamos a que esto se ejecute en un solo nodo
+#SBATCH --mail-type=ALL ### queremos que nos lleguen todos los status
+#SBATCH --mem=4G ### en el flag -Xmx3g de bbduk estamos asignando 3 gigabytes de ram por lo que asignamos 4G de ram ante un inesperado peak.
+#SBATCH --cpus-per-task=20 ### en el flag threads=20 de bbduk estamos asignando 20 cpus por lo que tenemos que configurarlo en el scheduler.
+ 
+### INDICAMOS AL NODO DONDE ESTA BBDUK
+export PATH=~/bin/bbmap:$PATH
+
+#### Ejecutamos bbduk
+
+bbduk.sh -Xmx3g in=R1.fq in2=R2.fq ref=adaptors.fa mm=f rcomp=f out=clean_R1 out2=clean_R2 threads=20 minlen=read_min_len qtrim=lr trimq=20 ktrim=r k=21 mink=9 hdist=1 tpe tbo overwrite=true
+
+```
 
 ### Paso 2, Mapping [BWA](http://bio-bwa.sourceforge.net/)
 
