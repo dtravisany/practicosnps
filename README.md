@@ -115,6 +115,12 @@ nuestro "brand new" python como el python por defecto:
 
     conda init
 
+Para activar el ambiente ejecutaremos
+
+    cd 
+    cd anaconda3/condabin/
+    ./conda init
+    
 Nos saldremos de NLHPC y volveremos a hacer login
 
     exit
@@ -143,8 +149,6 @@ Levantamos el módulo de java:
     conda env create python=3.6.2 -f gatkcondaenv.yml
 
 Con esto hemos creado un nuevo ambiente python 3.6.2, puede revisar sus ambientes en `~/anaconda3/envs/` o con ```conda environments```.
-
-Para activar el ambiente ejecutaremos
 
     conda activate gatk
       
