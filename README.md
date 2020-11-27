@@ -170,6 +170,19 @@ veremos que es `download: gzip compressed data, was "BBMap_38.87.tar"`, es decir
 revisaremos si funciona bbduk:
     
     ./bbduk.sh
+Perfecto,
+
+Ahora instalaremos [BWA](https://github.com/lh3/bwa)
+
+    git clone https://github.com/lh3/bwa.git
+    cd bwa
+    make
+
+revisaremos si funcional BWA
+    ./bwa
+ 
+Perfecto,
+
 
 Ahora volvemos a nuestro `$HOME` y crearemos la carpeta `READS`:
 
@@ -191,6 +204,17 @@ Haremos un enlace simbólico a los reads:
     ln -s SRR062634_1.filt.fastq.gz R1.fq
     ln -s SRR062634_2.filt.fastq.gz R2.fq
 
+Descargaremos el archivo de adaptadores para [bbduk](https://github.com/BioInfoTools/BBMap/blob/master/resources/adapters.fa)
+
+    wget https://raw.githubusercontent.com/BioInfoTools/BBMap/master/resources/adapters.fa
+    
+ Descargamos el genoma humano:
+ 
+    wget https://ftp.ncbi.nlm.nih.gov/genomes/all/GCF/000/001/405/GCF_000001405.39_GRCh38.p13/GCF_000001405.39_GRCh38.p13_genomic.fna.gz
+ 
+ Generamos un enlace simbólico a la referencia:
+ 
+    ln -s GCF_000001405.39_GRCh38.p13/GCF_000001405.39_GRCh38.p13_genomic.fna.gz reference.fna.gz
 
 ## GATK Pipeline Magic
 
@@ -226,7 +250,7 @@ y escribimos el siguiente contenido:
 
 #SBATCH --job-name=bbduk ### ASIGNAMOS EL NOMBRE: bbduk
 #SBATCH --output=bbduk.out ### asignamos un archivo que nos guarde la salida o el STDOUT del programa
-#SBATCH --error=mini.err ### asignamos un archivo que nos guarde el error o el STDERR del programa
+#SBATCH --error=bbduk.err ### asignamos un archivo que nos guarde el error o el STDERR del programa
 #SBATCH --mail-user=user@mail.com ### asignamos un mail para que nos envié el status del job
 #SBATCH --nodes=1   ### forzamos a que esto se ejecute en un solo nodo
 #SBATCH --mail-type=ALL ### queremos que nos lleguen todos los status
@@ -238,13 +262,13 @@ export PATH=~/bin/bbmap:$PATH
 
 #### Ejecutamos bbduk
 
-bbduk.sh -Xmx3g in=R1.fq in2=R2.fq ref=adaptors.fa mm=f rcomp=f out=clean_R1 out2=clean_R2 threads=20 minlen=read_min_len qtrim=lr trimq=20 ktrim=r k=21 mink=9 hdist=1 tpe tbo overwrite=true
+bbduk.sh -Xmx3g in=R1.fq in2=R2.fq ref=adapters.fa mm=f rcomp=f out=clean_R1 out2=clean_R2 threads=20 minlen=50 qtrim=lr trimq=20 ktrim=r k=21 mink=9 hdist=1 tpe tbo overwrite=true
 
 ```
 
 ### Paso 2, Mapping [BWA](http://bio-bwa.sourceforge.net/)
 
-    bwa index reference.fasta
+    bwa index reference.fna.gz
     bwa mem -t 20 -o output.sam clean_R1.fq clean_R2.fq
     samtools view -bS output.sam > output.bam
 
