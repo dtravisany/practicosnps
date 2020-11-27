@@ -1,6 +1,16 @@
 # Práctico SNPs
 
 ## Introducción
+Una de las mayores dificultades que tenemos al momento de querer obtener resultados 
+de un análisis bioinformático consiste en la instalación de los programas, en este práctico, 
+parte importante consistirá en que ustedes logren instalar y generar el ambiente necesario para 
+tener un pipeline funcional total de análisis de variantes (SECCIÓN PRELIMINARES) y luego 
+ejecutar un análisis sobre reads públicos del proyecto internacional [1000 genomas](www.1000genomes.org).
+
+Acá puede ver un video del proyecto:
+
+![[Video 1000 Genomas]()]()
+
 
 En el siguiente práctico ejecutaremos el pipeline de [GATK](https://gatk.broadinstitute.org/hc/en-us).
 Luego anotaremos las variantes y buscaremos el resultado en bases de datos internacionales.
@@ -24,7 +34,7 @@ Luego anotaremos las variantes y buscaremos el resultado en bases de datos inter
 ## Preliminares
 
 El ejercicio comienza desde cero, es decir, generaremos un ambiente en el [NLHPC](www.nlhpc.cl) por nuestra cuenta para ejecutar GATK.
-Para esto, deberemos preparar todo un ambiente. 
+Para esto, deberemos preparar todo el ambiente. 
 
 Conéctese al NLHPC utilizando su usuario y contraseña y en su `HOME`... 
 
@@ -183,6 +193,12 @@ revisaremos si funcional BWA
  
 Perfecto,
 
+Todavía nos falta samtools, para esto utilizaremos un recipe de 
+conda, porque sino sería muy compleja la instalación:
+
+    conda install -c bioconda samtools
+
+
 
 Ahora volvemos a nuestro `$HOME` y crearemos la carpeta `READS`:
 
@@ -218,7 +234,8 @@ Haremos un enlace simbólico al archivo de adaptadores para [bbduk](https://gith
 
 ## GATK Pipeline Magic
 
-##### Basado en las recomendaciones de [Ricardo Palma](http://www.cmm.uchile.cl/?cmm_people=ricardo-palma)
+Basado en las recomendaciones de [Ricardo Palma](http://www.cmm.uchile.cl/?cmm_people=ricardo-palma) 
+recopiladas de los foros de GATK y las buenas prácticas.
 
 
 #### Paso 1. Filtrado:
@@ -273,22 +290,19 @@ Si llegara a tener una línea como esta:
 Es porque se parametrizó mal la cantidad de memoria que requería su trabajo.
 
 
-
-
 #### Paso 2, Mapping [BWA](http://bio-bwa.sourceforge.net/)
 
 Indexamos el genoma humano:
 
     bwa index reference.fna.gz
 
-Mapeamos los reads al genoma (ATENTO CON LOS PARAMETROS DE SU JOB):
+Mapeamos los reads al genoma (ATENTO CON LOS PARÁMETROS DE SU JOB):
 
     bwa mem -t 20 -o output.sam reference.fna.gz clean_R1 clean_R2
 
 Transformamos nuestro archivo sam a formato bam:
 
     samtools view -bS output.sam > output.bam
-
 
 
 #### Paso 3, [MarkDuplicates](https://gatk.broadinstitute.org/hc/en-us/articles/360037224932-MarkDuplicatesSpark)
