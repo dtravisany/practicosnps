@@ -269,7 +269,8 @@ bbduk.sh -Xmx3g in=R1.fq in2=R2.fq ref=adapters.fa mm=f rcomp=f out=clean_R1 out
 
 Si llegara a tener una línea como esta:
 
-Es porque se parametrizó mal la cantidad de memoria que requería su trabajo:
+![error_mem.png](imgs/error_mem.png "Error de Memoria")
+Es porque se parametrizó mal la cantidad de memoria que requería su trabajo.
 
 
 
