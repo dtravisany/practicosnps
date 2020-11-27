@@ -1,6 +1,6 @@
 # Práctico SNPs
 
-Introducción
+#### Introducción
 
 En el siguiente práctico ejecutaremos el pipeline de [GATK](https://gatk.broadinstitute.org/hc/en-us).
 Luego anotaremos las variantes y buscaremos el resultado en bases de datos internacionales.
@@ -10,15 +10,23 @@ Luego anotaremos las variantes y buscaremos el resultado en bases de datos inter
 1. Demostrar la capacidad de instalar un programa en HPC desde su carpeta local sin permiso de root.
 2. Poder ejecutar el pipeline y la generación de scripts `SBATCH` por si solos.
 3. Montar la capacidad de buscar variantes en HPC.
-4. Buscar Variantes utilizando GATK.
-5. Anotar las variantes con ANNOVAR.
+4. Buscar Variantes utilizando GATK ([artículo](https://genome.cshlp.org/content/20/9/1297.short)).
+5. Anotar las variantes con [ANNOVAR](http://wannovar.wglab.org/) ([artículo](https://www.nature.com/articles/nprot.2015.105)).
+6. Interpretar los resultados.
+
+#### Fechas
+
+1. La entrega será el 14 de diciembre del 2020 (no podemos pasarnos de esa fecha), sin embargo,
+2. Las cuentas estarán disponibles hasta el 16 de enero del 2021, por si les interesa utilizar el clúster.
 
 
 
 ## Preliminares
 
-El ejercicio comienza desde cero, es decir, generaremos un ambiente en el NLHPC por nuestra cuenta para ejecutar GATK.
-Para esto, deberemos preparar todo un ambiente.
+El ejercicio comienza desde cero, es decir, generaremos un ambiente en el [NLHPC](www.nlhpc.cl) por nuestra cuenta para ejecutar GATK.
+Para esto, deberemos preparar todo un ambiente. 
+
+Conéctese al NLHPC utilizando su usuario y contraseña y en su `HOME`... 
 
 Comenzaremos creando una carpeta inicial:
 
@@ -45,7 +53,7 @@ Revisemos las versiones de Java:
     module avail
      
  
-Existen varias versiones de Java, cargaremos Java:
+ Podemos ver que existen varias versiones de Java, cargaremos la siguiente:
 
     ml Java/1.8
 
@@ -67,8 +75,8 @@ Crearemos un job para instalar anaconda:
 
     vim install.sbatch
       
- escribimos lo siguiente:
- 
+ escribimos lo siguiente (deberá reemplazar su usuario y mail en el campo mail, para revisar que le llega la secuencia):
+ ```bash
     #!/bin/sh
 
     #SBATCH --job-name=miniconda
@@ -78,6 +86,7 @@ Crearemos un job para instalar anaconda:
     #SBATCH --nodes=1
     #SBATCH --mail-type=ALL
     sh Miniconda3-latest-Linux-x86_64.sh -b -p $HOME/anaconda3
+```
 
 Guardamos y ejecutamos nuestro job:
 
@@ -115,7 +124,7 @@ Nos vamos a:
     cd GATK
     cd gatk-4.1.9.0
     
-Levantamos el modulo de java:
+Levantamos el módulo de java:
 
     ml Java/1.8
     
@@ -147,6 +156,9 @@ ahora volvemos a la carpeta de GATK:
 
 
 ### Paso 1. Filtrado:
+
+Para cada comando o conjunto de comandos deberá realizar un script `SBATCH` para ejecutar sus tareas.
+
 
 Realizaremos el filtrado con [BBDUK](https://jgi.doe.gov/data-and-tools/bbtools/bb-tools-user-guide/bbduk-guide/) “””aka Magical Mathematics of Console Gymnastics ””” 
 
