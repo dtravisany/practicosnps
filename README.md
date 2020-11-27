@@ -5,7 +5,15 @@ Introducción
 En el siguiente práctico ejecutaremos el pipeline de [GATK](https://gatk.broadinstitute.org/hc/en-us).
 Luego anotaremos las variantes y buscaremos el resultado en bases de datos internacionales.
 
-El objetivo del práctico es que sean capaces de correr el pipeline por si solos.
+#### Objetivos
+
+1. Demostrar la capacidad de instalar un programa en HPC desde su carpeta local sin permiso de root.
+2. Poder ejecutar el pipeline y la generación de scripts `SBATCH` por si solos.
+3. Montar la capacidad de buscar variantes en HPC.
+4. Buscar Variantes utilizando GATK.
+5. Anotar las variantes con ANNOVAR.
+
+
 
 ## Preliminares
 
