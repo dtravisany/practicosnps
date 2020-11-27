@@ -265,6 +265,13 @@ export PATH=~/bin/bbmap:$PATH
 bbduk.sh -Xmx3g in=R1.fq in2=R2.fq ref=adapters.fa mm=f rcomp=f out=clean_R1 out2=clean_R2 threads=20 minlen=50 qtrim=lr trimq=20 ktrim=r k=21 mink=9 hdist=1 tpe tbo overwrite=true
 
 ```
+## ES MUY IMPORTANTE QUE SIEMPRE REVISEMOS EL ARCHIVO .err, PARA SABER COMO ANDUVO NUESTRO JOB
+
+Si llegara a tener una línea como esta:
+
+Es porque se parametrizó mal la cantidad de memoria que requería su trabajo:
+
+
 
 
 #### Paso 2, Mapping [BWA](http://bio-bwa.sourceforge.net/)
