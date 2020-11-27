@@ -221,6 +221,14 @@ Ahora probaremos samtools
 
 Perfecto,
 
+Ahora instalaremos [Picard tools](https://broadinstitute.github.io/picard/):
+
+	conda  install -c bioconda/label/cf201901 picard
+
+probamos picard:
+
+	picard
+
 
 Ahora volvemos a nuestro `$HOME` y crearemos la carpeta `READS`:
 
