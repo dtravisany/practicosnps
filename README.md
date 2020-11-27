@@ -114,20 +114,24 @@ Nos vamos a:
 
     cd GATK
     cd gatk-4.1.9.0
- y crearemos un ambiente GATK:
- 
-    conda env create -f gatkcondaenv.yml
+    
+Levantamos el modulo de java:
 
-De esta manera no interferimos con los paquetes ya instalados, para esto haremos un 
+    ml Java/1.8
+    
+ y crearemos un ambiente gatk:
+ 
+    conda env create python=3.6.2 -f gatkcondaenv.yml
+
 Con esto hemos creado un nuevo ambiente python 3.6.2, puede revisar sus ambientes en `~/anaconda3/envs/` o con ```conda environments```.
 
 Para activar el ambiente ejecutaremos
 
-    conda activate GATK
+    conda activate gatk
       
 el prompt debería cambiar a:
       
-    (GATK)user@server:~$
+    (gatk)user@server:~$
 
 podemos ver que nuestro python ahora cambio de dirección de nuevo:
 
