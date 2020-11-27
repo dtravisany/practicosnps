@@ -5,6 +5,7 @@ Introducción
 En el siguiente práctico ejecutaremos el pipeline de [GATK](https://gatk.broadinstitute.org/hc/en-us).
 Luego anotaremos las variantes y buscaremos el resultado en bases de datos internacionales.
 
+El objetivo del práctico es que sean capaces de correr el pipeline por si solos.
 
 ## Preliminares
 
@@ -85,16 +86,16 @@ Si lo ejecutó por defecto, su instalación debería quedar en el path: `/home/c
 Cuando la instalación se haya completado, inicializaremos conda para que considere 
 nuestro "brand new" python como el python por defecto:
 
-      conda init
+    conda init
 
 Nos saldremos de NLHPC y volveremos a hacer login
 
-      exit
-      ssh student[07-10]@server
+    exit
+    ssh student[07-10]@server
 
 Ahora deberiamos ver en nuestro prompt algo como esto:
 
-      (base)user@server:~$
+    (base)user@server:~$
       
 Ya tenemos nuestro python local corriendo y listo para instalarle paquetes.
 El primer caveat es que la versión requerida para este GATK, es python 3.6.2 descrita en el README.md de GATK.
@@ -114,15 +115,15 @@ Con esto hemos creado un nuevo ambiente python 3.6.2, puede revisar sus ambiente
 
 Para activar el ambiente ejecutaremos
 
-      conda activate GATK
+    conda activate GATK
       
 el prompt debería cambiar a:
       
-      (GATK)user@server:~$
+    (GATK)user@server:~$
 
 podemos ver que nuestro python ahora cambio de dirección de nuevo:
 
-      which python
+    which python
       
 ahora volvemos a la carpeta de GATK:
 
@@ -148,22 +149,25 @@ profiles)
 
 ### Paso 2, Mapping [BWA](http://bio-bwa.sourceforge.net/)
 
-        bwa index reference.fasta
-        bwa mem -t 20 -o output.sam clean_R1.fq clean_R2.fq
-        samtools view -bS output.sam > output.bam
+    bwa index reference.fasta
+    bwa mem -t 20 -o output.sam clean_R1.fq clean_R2.fq
+    samtools view -bS output.sam > output.bam
 
 
 ### Paso 3, [MarkDuplicates](https://gatk.broadinstitute.org/hc/en-us/articles/360037224932-MarkDuplicatesSpark)
 
-MarkDuplicates and Sorting BAM
+Marcamos los duplicados  y ordenamos el BAM
 
     gatk MarkDuplicatesSpark -I output.bam -O marked_duplicates_sorted.bam
 
-If can’t make MarkDuplicatesSpark work, use the old method:
+#### Opcional
+
+Si es que no llegara a funcionar podemos utilizar siempre el método antiguo
 
     java -jar picard.jar MarkDuplicates I= output.bam O=marked_duplicates.bam M=marked_dup_metrics.txt
 
     samtools sort -T temp_sorted.bam -o marked_duplicates_sorted.bam marked_dup_metrics.txt
+
 
 ### Paso 4 [Haplotypecalller](https://gatk.broadinstitute.org/hc/en-us/articles/360042913231-HaplotypeCaller): 
 
@@ -174,19 +178,10 @@ Variant Calling Per-Sample
 
 ### Paso 5 
 
-VariantRecalibrator, and ApplyVQSR
-
------“NOPE” skip to Paso 5 EASY
-
-Paso 5 EASY 
-“”””AKA”””” This is not my Tesis or anything so I don’t care that much about 
-these samples ….. or my lab is too  cheap and they are a bunch of wannabes 
-so they did the WES/WGS in assembly ChR37 instead of ChR38 so I’ll do the 
-easy way”
-https://gatk.broadinstitute.org/hc/en-us/articles/360035531112--How-to-Filter-variants
+VariantRecalibrator, and [ApplyVQSR](https://gatk.broadinstitute.org/hc/en-us/articles/360035531112--How-to-Filter-variants)
 -either-with-VQSR-or-by-hard-filtering 
 
-First, split the g_vcf. Files into SNPs and INDELs:
+#### First, split the g_vcf. Files into SNPs and INDELs:
 
     gatk SelectVariants -V output.g.vcf.gz -select-type SNP -O only_snps.vcf.gz
     gatk SelectVariants -V output.g.vcf.gz -select-type INDEL -O only_indels.vcf.gz
@@ -194,25 +189,31 @@ First, split the g_vcf. Files into SNPs and INDELs:
 Now apply the “Hard-filtering” for Variants.
 
 
-Hard-Filtering for SNPs
+##### Hard-Filtering for SNPs
 
-$ gatk VariantFiltration -V only_snps.vcf.gz -filter "QD < 2.0" --filter-name "QD2" -filter "QUAL < 30.0" --filter-name "QUAL30" -filter "SOR > 3.0" --filter-name "SOR3" -filter "FS > 60.0" --filter-name "FS60" -filter "MQ < 40.0" --filter-name "MQ40" -filter "MQRankSum < -12.5" --filter-name "MQRankSum-12.5" -filter "ReadPosRankSum < -8.0" --filter-name "ReadPosRankSum-8" -O snps_filtered.vcf.gz
-
-
-Hard-Filtering for INDELs
-
-$ gatk VariantFiltration V only_indels.vcf.gz -filter "QD < 2.0" --filter-name "QD2"    -filter "QUAL < 30.0" --filter-name "QUAL30" -filter "FS > 200.0" --filter-name "FS200" -filter "ReadPosRankSum < -20.0" --filter-name "ReadPosRankSum-20" -O indels_filtered.vcf.gz
-
-
-If a variant Pass all filters it will be tag as PASS in the “INFO” field 
-of the VCF, if not the name of the fault filter will be displayed.
-
-Last Step
-
-Extract all PASS sequences in the VCF file.
+    gatk VariantFiltration -V only_snps.vcf.gz -filter "QD < 2.0" --filter-name "QD2" \\
+    -filter "QUAL < 30.0" --filter-name "QUAL30" -filter "SOR > 3.0" --filter-name "SOR3" \\
+    -filter "FS > 60.0" --filter-name "FS60" -filter "MQ < 40.0" --filter-name "MQ40" \\
+    -filter "MQRankSum < -12.5" --filter-name "MQRankSum-12.5" -filter "ReadPosRankSum < -8.0" \\
+    --filter-name "ReadPosRankSum-8" -O snps_filtered.vcf.gz
 
 
-##### _Congrats, you skipped 6 months navigating GATK forums. Ricardo Palma_ 
+##### Hard-Filtering for INDELs
+
+    gatk VariantFiltration V only_indels.vcf.gz -filter "QD < 2.0" --filter-name "QD2" \\
+    -filter "QUAL < 30.0" --filter-name "QUAL30" -filter "FS > 200.0" --filter-name "FS200" \\
+    -filter "ReadPosRankSum < -20.0" --filter-name "ReadPosRankSum-20" -O indels_filtered.vcf.gz
+
+
+    If a variant Pass all filters it will be tag as PASS in the “INFO” field 
+    of the VCF, if not the name of the fault filter will be displayed.
+
+### Last Step
+
+Extraer todas las variantes que pasaron el filtro `PASS` en GATK.
+
+
+###### _Congrats, you skipped 6 months navigating GATK forums. Ricardo Palma_ 
 
 
 
