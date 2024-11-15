@@ -5,7 +5,7 @@ Una de las mayores dificultades que tenemos al momento de querer obtener resulta
 de un análisis bioinformático consiste en la instalación de los programas, en este práctico, 
 parte importante consistirá en que ustedes logren instalar y generar el ambiente necesario para 
 tener un pipeline funcional total de análisis de variantes (SECCIÓN PRELIMINARES) y luego 
-ejecutar un análisis sobre reads públicos del proyecto internacional [1000 genomas](https://www.1000genomes.org).
+ejecutar un análisis sobre reads públicos del proyecto internacional [1000 genomas](https://www.internationalgenome.org/).
 
 
 
@@ -256,7 +256,7 @@ y escribimos el siguiente contenido:
 #SBATCH --cpus-per-task=20 ### en el flag threads=20 de bbduk estamos asignando 20 cpus por lo que tenemos que configurarlo en el scheduler.
  
 ### INDICAMOS AL NODO DONDE ESTA BBDUK
-export PATH=~/bin/bbmap:$PATH
+export PATH=~/bin/bbmap:$PATH ### AJUSTAR A SU UBICACIÓN
 
 #### Ejecutamos bbduk
 
