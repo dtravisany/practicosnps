@@ -7,6 +7,8 @@ parte importante consistirá en que ustedes logren instalar y generar el ambient
 tener un pipeline funcional total de análisis de variantes (SECCIÓN PRELIMINARES) y luego 
 ejecutar un análisis sobre reads públicos del proyecto internacional [1000 genomas](https://www.internationalgenome.org/).
 
+❗Existe un muy buen video publicado hace menos de un mes por NCBI sobre su plataforma [clinvar](https://www.ncbi.nlm.nih.gov/clinvar/). 
+Les dejo el [vínculo en YouTube](https://www.youtube.com/watch?v=Pty0vW9CkEE), acá se explica desde que es un gen y que es una variante hasta como utilizar la plataforma. 
 
 
 En el siguiente práctico ejecutaremos el pipeline de [GATK](https://gatk.broadinstitute.org/hc/en-us).
