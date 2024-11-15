@@ -205,7 +205,7 @@ Haremos un enlace simbólico a los reads:
 
 Haremos un enlace simbólico al archivo de adaptadores para [bbduk](https://github.com/BioInfoTools/BBMap/blob/master/resources/adapters.fa)
 
-    ln -s $HOME/bin/bbmap/resources/adapters.fa .
+    ln -s $HOME/GATK/bin/bbmap/resources/adapters.fa .
     
  Descargamos el genoma humano:
  
