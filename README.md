@@ -5,7 +5,7 @@ Una de las mayores dificultades que tenemos al momento de querer obtener resulta
 de un análisis bioinformático consiste en la instalación de los programas, en este práctico, 
 parte importante consistirá en que ustedes logren instalar y generar el ambiente necesario para 
 tener un pipeline funcional total de análisis de variantes (SECCIÓN PRELIMINARES) y luego 
-ejecutar un análisis sobre reads públicos del proyecto internacional [1000 genomas](www.1000genomes.org).
+ejecutar un análisis sobre reads públicos del proyecto internacional [1000 genomas](https://www.1000genomes.org).
 
 
 
