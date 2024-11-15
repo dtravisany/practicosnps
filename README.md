@@ -200,8 +200,8 @@ Luego extraeremos los reads:
 
 Haremos un enlace simbólico a los reads:
 
-    ln -s SRR062634_1.filt.fastq.gz R1.fq
-    ln -s SRR062634_2.filt.fastq.gz R2.fq
+    ln -s SRR062634_1.filt.fastq R1.fq
+    ln -s SRR062634_2.filt.fastq R2.fq
 
 Haremos un enlace simbólico al archivo de adaptadores para [bbduk](https://github.com/BioInfoTools/BBMap/blob/master/resources/adapters.fa)
 
