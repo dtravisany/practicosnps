@@ -7,9 +7,6 @@ parte importante consistirá en que ustedes logren instalar y generar el ambient
 tener un pipeline funcional total de análisis de variantes (SECCIÓN PRELIMINARES) y luego 
 ejecutar un análisis sobre reads públicos del proyecto internacional [1000 genomas](www.1000genomes.org).
 
-Acá puede ver un video del proyecto:
-
-![[Video 1000 Genomas]()]()
 
 
 En el siguiente práctico ejecutaremos el pipeline de [GATK](https://gatk.broadinstitute.org/hc/en-us).
@@ -24,12 +21,6 @@ Luego anotaremos las variantes y buscaremos el resultado en bases de datos inter
 5. Anotar las variantes con [ANNOVAR](http://wannovar.wglab.org/) ([artículo](https://www.nature.com/articles/nprot.2015.105)).
 6. Interpretar los resultados.
 
-## Fechas
-
-1. La entrega será el 14 de diciembre del 2020 (no podemos pasarnos de esa fecha), sin embargo,
-2. Las cuentas estarán disponibles hasta el 16 de enero del 2021, por si les interesa utilizar el clúster.
-
-
 
 ## Preliminares
 
@@ -42,43 +33,11 @@ Comenzaremos creando una carpeta inicial:
 
     mkdir GATK
 
-Entre a su carpeta y descargue GATK.
+Entre a su carpeta, si no tiene instalada una versión de miniconda, descargue e instale miniconda:
 
-
-Deberan descargar [GATK 4.1.9](https://github.com/broadinstitute/gatk/releases/download/4.1.9.0/gatk-4.1.9.0.zip):
-
-
-    wget https://github.com/broadinstitute/gatk/releases/download/4.1.9.0/gatk-4.1.9.0.zip
-     
-     
-Realice un unzip de su carpeta:
-
-    unzip gatk-4.1.9.0.zip
-     
-Quedará una carpeta gatk-4.1.9.0, revise su carpeta y ejecutemos un test, 
-pero antes necesitaremos cargar java 8 en nuestro ambiente para probar el programa:
-
-Revisemos las versiones de Java:
-  
-    module avail
-     
- 
- Podemos ver que existen varias versiones de Java, cargaremos la siguiente:
-
-    ml Java/1.8
-
-
-Crearemos un ambiente python para instalar algunas dependencias necesarias para ejecutar GATK:
-
-    cd ..
-    mkdir python
-    cd python
-
-
-Para esto descargaremos miniconda, iremos a [conda](https://docs.conda.io/en/latest/miniconda.html) y descargaremos la última versión en este caso 3.8:
+Para esto descargaremos miniconda, iremos a [conda](https://docs.conda.io/en/latest/miniconda.html) y descargaremos la última versión en este caso Latest - Conda 24.9.2 Python 3.12.7 released Oct 23, 2024:
 
     wget https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh
-
 
 
 Crearemos un job para instalar anaconda:
@@ -131,24 +90,12 @@ Ahora deberiamos ver en nuestro prompt algo como esto:
     (base)user@server:~$
       
 Ya tenemos nuestro python local corriendo y listo para instalarle paquetes.
-El primer caveat es que la versión requerida para este GATK, es python 3.6.2 descrita en el [README.md](https://github.com/broadinstitute/gatk) de GATK.
-Por lo que vamos a generar un ambiente virtual de nuestro miniconda que contenga solo los requerimientos de GATK.
-Para nuestro beneficio estos requermientos vienen en un archivo de configuracion yaml.
 
-Nos vamos a:
-
-    cd GATK
-    cd gatk-4.1.9.0
-    
-Levantamos el módulo de java:
-
-    ml Java/1.8
-    
- y crearemos un ambiente gatk:
+Crearemos un ambiente 
  
-    conda env create python=3.6.2 -f gatkcondaenv.yml
+    conda create --name gatk python=3.11
 
-Con esto hemos creado un nuevo ambiente python 3.6.2, puede revisar sus ambientes en `~/anaconda3/envs/` o con ```conda environments```.
+Con esto hemos creado un nuevo ambiente python 3.11, puede revisar sus ambientes en `~/anaconda3/envs/` o con ```conda env list```.
 
     conda activate gatk
       
@@ -175,7 +122,7 @@ si ejecutamos un file:
     
     file download
     
-veremos que es `download: gzip compressed data, was "BBMap_38.87.tar"`, es decir un archivo `.tar.gz`
+veremos que es `download: gzip compressed data, was "BBMap_39.11.tar"`, es decir un archivo `.tar.gz`
 
     tar xvfz download
     rm download
@@ -190,7 +137,7 @@ Ahora instalaremos [BWA](https://github.com/lh3/bwa)
 
     git clone https://github.com/lh3/bwa.git
     cd bwa
-    make
+    make -j 8
 
 revisaremos si funcional BWA
     ./bwa
@@ -227,7 +174,7 @@ Perfecto,
 
 Ahora instalaremos [Picard tools](https://broadinstitute.github.io/picard/):
 
-	conda  install -c bioconda/label/cf201901 picard
+	conda install bioconda/label/cf201901::picard
 
 probamos picard:
 
